@@ -5,11 +5,13 @@
 # IMPORT
 import random
 
+import csv
+
 # CONSTANTES
 NBRE_LIGNES = 1000
 LISTE_CARAC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-
+#FONCTIONS
 def creation():
     """
         Creation du fichier .csv contenant les milles identifiant permettant de reconnaitre
@@ -24,19 +26,9 @@ def creation():
         if temp not in list_codes:
             list_codes.append(temp)
 
-    ecriture(list_codes)
+    csv.ecriture("ef_codes_NomSite", list_codes)
 
 
-def ecriture(list_codes):
-    """
-        Ecriture de la liste de code dans le fichier .csv
-    """
-    with open("ef_codes_NomSite.csv", 'w') as file_csv:
-        for code in list_codes:
-            file_csv.write(code)
-            file_csv.write('\n')
-
-
-# Auto-lancement
+# AUTO-LANCEMENT
 if __name__ == '__main__':
     creation()
