@@ -3,13 +3,14 @@
 """
 
 # IMPORT
+import csv
 import random
 
-import csv
 
 # CONSTANTES
 NBRE_LIGNES = 1000
 LISTE_CARAC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
 
 #FONCTIONS
 def creation():
