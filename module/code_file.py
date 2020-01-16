@@ -14,7 +14,7 @@ LISTE_CARAC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 
 #FONCTIONS
-def creation():
+def creation(filename):
     """
         Creation du fichier .csv contenant les milles identifiant permettant de reconnaitre
         les fichiers transmis par mail.
@@ -28,9 +28,9 @@ def creation():
         if temp not in list_codes:
             list_codes.append(temp)
 
-    csv.ecriture("module/ef_codes_NomSite", list_codes)
+    csv.ecriture(filename, list_codes)
+
 
 # AUTO-LANCEMENT
 if __name__ == '__main__':
-    import csv
-    creation()
+    creation("module/ef_codes_StChristolDAlbion")
