@@ -4,6 +4,8 @@
 """
 
 # IMPORT
+import datetime
+
 import csv
 import excel
 
@@ -38,7 +40,8 @@ def creation(file_name):
 
             list_conso.append(ligne)
 
-    csv.ecriture("module/test_conso", list_conso)
+    csv.ecriture("module/ef_consommations_StChristolDAlbion_" + str(datetime.date.today()) + "_"
+                 + csv.lecture("ef_codes_StChristolDAlbion.csv"), list_conso)
 
 
 def format_ecart(date_d, date_d_1):
