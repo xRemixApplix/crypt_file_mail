@@ -6,8 +6,10 @@
 # IMPORT
 import csv
 
+
 # CONSTANTES
 ENTETE = "id_cp; bd; p; val; eq_kwh; eq_eu"
+
 
 # FONCTIONS
 def creation():
@@ -27,5 +29,5 @@ def creation():
 # AUTO-LANCEMENT
 if __name__ == '__main__':
     import excel
-    
+
     creation()

@@ -3,6 +3,7 @@
 """
 
 # IMPORT
+import re
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -11,7 +12,10 @@ from email import encoders
 
 
 # CONSTANTES
-
+EMAIL_REGEX = re.compile(
+    r"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*"
+    r'|^"([\001-\010\013\014\016-\037!#-\[\]-\177]|\\[\001-011\013\014\016-\177])*"'
+    r')@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?$', re.IGNORECASE)
 
 # FONCTIONS
 def envoi(fichier_a_envoyer, liste_destinataires, liste_destinataires_cc):
@@ -71,15 +75,27 @@ def create_dest():
         try:
             adress, param = input("Adresse Destinaire : ").split(' ')
         except ValueError:
-            print('\x1b[6;31;40m' + "Erreur de syntaxe" + '\x1b[0m')
+            # Texte en rouge
+            print('\x1b[6;31;40m'
+                  + "Erreur de syntaxe"
+                  + '\x1b[0m')
         else:
             if adress.upper() != "Q":
-                if param.upper() == "D":
-                    list_dest.append(adress)
-                elif param.upper() == "C":
-                    list_dest_cc.append(adress)
+                if re.match(EMAIL_REGEX, adress) is None:
+                    # Texte en orange
+                    print('\x1b[6;33;40m'
+                          + "Format de l'adresse incorrecte"
+                          + '\x1b[0m')
                 else:
-                    print('\x1b[6;33;40m' + "Etat Destinataire non reconnu (D: Principal, C; Copie)" + '\x1b[0m')
+                    if param.upper() == "D":
+                        list_dest.append(adress.lower())
+                    elif param.upper() == "C":
+                        list_dest_cc.append(adress.lower())
+                    else:
+                        # Texte en orange
+                        print('\x1b[6;33;40m'
+                              + "Etat Destinataire non reconnu (D: Principal, C: Copie)"
+                              + '\x1b[0m')
             else:
                 break
 
