@@ -33,4 +33,4 @@ def creation(filename):
 
 # AUTO-LANCEMENT
 if __name__ == '__main__':
-    creation("module/ef_codes_StChristolDAlbion")
+    creation("file_conso/ef_codes_StChristolDAlbion")

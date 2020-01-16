@@ -6,8 +6,8 @@
 # IMPORT
 import datetime
 
-import csv
-
+import module.csv as csv
+import module.excel as excel
 
 
 # CONSTANTES
@@ -40,10 +40,13 @@ def creation(file_name):
 
             list_conso.append(ligne)
 
-    liste_codes = csv.lecture("module/ef_codes_StChristolDAlbion")
-    csv.ecriture("module/ef_consommations_StChristolDAlbion_" + str(datetime.date.today()) + "_"
-                 + liste_codes[0], list_conso)
-    csv.ecriture("module/ef_codes_StChristolDAlbion", liste_codes[1:-1])
+    liste_codes = csv.lecture("file_conso/ef_codes_StChristolDAlbion")
+    file_conso = "file_conso/ef_consommations_StChristolDAlbion_" \
+        + str(datetime.date.today()) + "_" + liste_codes[0]
+    csv.ecriture(file_conso, list_conso)
+    csv.ecriture("file_conso/ef_codes_StChristolDAlbion", liste_codes[1:-1])
+
+    return file_conso
 
 
 def format_ecart(date_d, date_d_1):
@@ -64,5 +67,5 @@ def format_ecart(date_d, date_d_1):
 # AUTO-LANCEMENT
 if __name__ == '__main__':
     import excel
-    
+
     creation('test.xlsx')
