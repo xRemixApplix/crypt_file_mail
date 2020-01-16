@@ -19,20 +19,22 @@ def creation(file_name):
         à envoyer par mail.
     """
     list_conso = [ENTETE]
-    date = name = ""
+    date = name = mesure = ""
 
     for data in excel.lecture(file_name, 'DATA'):
         if name != data[2]:
             date = excel.convert_date(data[0])
+            mesure = data[1]
             name = data[2]
         else:
             ligne = str(data[2]) + ";"
-            ligne += str(excel.convert_date(data[0]))+ ";"
+            ligne += excel.convert_date(data[0]).strftime("%d/%m/%Y %H:%M") + ";"
             ligne += format_ecart(excel.convert_date(data[0]), date) + ";"
-            ligne += str(round(data[1], 2))
+            ligne += str(round(data[1]-mesure, 3))
             ligne += ";;"
 
             date = excel.convert_date(data[0])
+            mesure = data[1]
 
             list_conso.append(ligne)
 
