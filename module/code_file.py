@@ -4,7 +4,6 @@
 
 # IMPORT
 import random
-
 import csv
 
 # CONSTANTES
