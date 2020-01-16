@@ -40,8 +40,10 @@ def creation(file_name):
 
             list_conso.append(ligne)
 
+    liste_codes = csv.lecture("module/ef_codes_StChristolDAlbion")
     csv.ecriture("module/ef_consommations_StChristolDAlbion_" + str(datetime.date.today()) + "_"
-                 + csv.lecture("ef_codes_StChristolDAlbion.csv"), list_conso)
+                 + liste_codes[0], list_conso)
+    csv.ecriture("module/ef_codes_StChristolDAlbion", liste_codes[1:-1])
 
 
 def format_ecart(date_d, date_d_1):
