@@ -63,4 +63,6 @@ def format_ecart(date_d, date_d_1):
 
 # AUTO-LANCEMENT
 if __name__ == '__main__':
+    import excel
+    
     creation('test.xlsx')
