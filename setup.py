@@ -9,13 +9,10 @@ EXECUTABLES = [Executable("auto.py", base=BASE)]
 PACKAGES = [
     "idna",
     "xlrd",
-    "astroid",
-    "isort",
-    "lazy-object-proxy",
-    "mccabe",
-    "six",
-    "typed-ast",
-    "wrapt"
+    "module/code_file",
+    "module/conso_file",
+    "module/mail",
+    "module/csv"
 ]
 
 OPTIONS = {
