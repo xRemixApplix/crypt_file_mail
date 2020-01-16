@@ -1,5 +1,5 @@
 """
-    Fichier général de l'application
+    Fichier général de l'application pour utilisateur
 """
 
 # IMPORT
@@ -9,6 +9,7 @@ import module.code_file as code
 import module.conso_file as conso
 import module.mail as mail
 import module.excel as excel
+import module.csv as csv
 
 
 # SCRIPT

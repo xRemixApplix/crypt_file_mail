@@ -18,7 +18,7 @@ EMAIL_REGEX = re.compile(
     r')@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?$', re.IGNORECASE)
 
 # FONCTIONS
-def envoi(fichier_a_envoyer, liste_destinataires, liste_destinataires_cc):
+def envoi(fichier_a_envoyer, liste_destinataires, liste_destinataires_cc, sujet_mail, texte_mail):
     """
         Envoi d'un mail
     """
@@ -33,10 +33,9 @@ def envoi(fichier_a_envoyer, liste_destinataires, liste_destinataires_cc):
     message['From'] = from_add
     message['To'] = ','.join(to_add)
     message['CC'] = ','.join(cc_add)
-    message['Subject'] = "Rapport EXPL de XXXXXX"
+    message['Subject'] = sujet_mail
     # Corps
-    msg = "Report de consommation presentes sur le site de XXXXXX"
-    message.attach(MIMEText(msg.encode('utf-8'), 'plain', 'utf-8'))
+    message.attach(MIMEText(texte_mail.encode('utf-8'), 'plain', 'utf-8'))
     # Piece jointe
     nom_piece_jointe = fichier_a_envoyer.split('/')[-1]
     piece = open(fichier_a_envoyer, 'rb')
@@ -56,6 +55,9 @@ def envoi(fichier_a_envoyer, liste_destinataires, liste_destinataires_cc):
 
     serveur.sendmail(from_add, to_adds, texte)
     serveur.quit()
+    print("############################################")
+    print("# Mail envoye au destinataire.s defini.e.s #")
+    print("############################################")
 
 
 def create_dest():
@@ -104,4 +106,5 @@ def create_dest():
 
 # AUTO-LANCEMENT
 if __name__ == '__main__':
-    envoi("test_conso.csv", ["r.invernizzi@jp-indus.fr"], [""])
+    envoi("test_conso.csv", ["r.invernizzi@jp-indus.fr"], [""],
+          "Rapport EXPL de XXXXXX", "Report de consommation presentes sur le site de XXXXXX")

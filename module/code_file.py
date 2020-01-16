@@ -4,7 +4,7 @@
 
 # IMPORT
 import random
-import csv
+import module.csv as csv
 
 
 # CONSTANTES
@@ -27,9 +27,9 @@ def creation():
         if temp not in list_codes:
             list_codes.append(temp)
 
-    csv.ecriture("ef_codes_NomSite", list_codes)
-
+    csv.ecriture("module/ef_codes_NomSite", list_codes)
 
 # AUTO-LANCEMENT
 if __name__ == '__main__':
+    import csv
     creation()
