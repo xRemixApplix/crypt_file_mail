@@ -45,14 +45,11 @@ def format_ecart(date_d, date_d_1):
     """
     ecart = date_d-date_d_1
 
-    ecart = str(ecart)
+    ecart = str(ecart).split(':')
 
-    if ecart == "0:01:00":
-        ecart = "1 minute"
-    elif ecart == "0:10:00":
-        ecart = "10 minutes"
-    elif ecart == "1:00:00":
-        ecart = "1 heure"
+    ecart = str(int(ecart[0])) + " heure(s)" if int(ecart[0]) > 0 else '' \
+        + str(int(ecart[1])) + " minute(s)" if int(ecart[1]) > 0 else '' \
+        + str(int(ecart[2])) + " seconde(s)" if int(ecart[2]) > 0 else ''
 
     return ecart
 
