@@ -7,6 +7,7 @@
 import csv
 
 
+
 # CONSTANTES
 ENTETE = "id_cp; bd; p; val; eq_kwh; eq_eu"
 
@@ -20,7 +21,7 @@ def creation():
     list_conso = [ENTETE]
 
     for data in excel.lecture('../test.xlsx', 'DATA'):
-        ligne = str(data[2]) + ";" + str(data[0]) + ";" + str(data[0]) + ";" + str(data[1]) + ";;"
+        ligne = str(data[2]) + ";" + str(excel.convert_date(data[0])) + ";" + str(data[0]) + ";" + str(data[1]) + ";;"
         list_conso.append(ligne)
 
     csv.ecriture("test_conso", list_conso)

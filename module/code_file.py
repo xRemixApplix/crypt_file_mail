@@ -3,6 +3,7 @@
 """
 
 # IMPORT
+import csv
 import random
 import module.csv as csv
 
