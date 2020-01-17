@@ -15,7 +15,7 @@ ENTETE = "id_cp; bd; p; val; eq_kwh; eq_eu"
 
 
 # FONCTIONS
-def creation(file_name):
+def creation(file_name, struct_fold):
     """
         Creation du fichier .csv contenant les informations des mesures
         à envoyer par mail.
@@ -40,18 +40,18 @@ def creation(file_name):
 
             list_conso.append(ligne)
 
-    liste_codes = csv.lecture("file_conso/ef_codes_StChristolDAlbion")
-    file_conso = "file_conso/ef_consommations_StChristolDAlbion_" \
+    liste_codes = csv.lecture(struct_fold['dest_csv_conso'] + 'ef_codes_StChristolDAlbion')
+    file_conso = struct_fold['dest_csv_conso'] + 'ef_consommations_StChristolDAlbion_' \
         + str(datetime.date.today()) + "_" + liste_codes[0]
     csv.ecriture(file_conso, list_conso)
-    csv.ecriture("file_conso/ef_codes_StChristolDAlbion", liste_codes[1:-1])
+    csv.ecriture(struct_fold['dest_csv_conso'] + 'ef_codes_StChristolDAlbion', liste_codes[1:-1])
 
     return file_conso
 
 
 def format_ecart(date_d, date_d_1):
     """
-        Formate l'ecart de temps entre les deux informations.
+        Formate l'ecart de temps entre les deux informations de consommation.
     """
     ecart = date_d-date_d_1
 
@@ -68,4 +68,4 @@ def format_ecart(date_d, date_d_1):
 if __name__ == '__main__':
     import excel
 
-    creation('test.xlsx')
+    creation('test.xlsx', "file_conso/")

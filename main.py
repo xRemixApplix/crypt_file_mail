@@ -13,9 +13,14 @@ import module.csv as csv
 
 
 # SCRIPT
-with open('options/dest_mail.json') as json_data:
-    ARBO_DEST = json.load(json_data)
+# Recuperation destinataires des mails
+with open('options/dest_mail.json') as json_dest_mail:
+    ARBO_DEST = json.load(json_dest_mail)
+# Recuperation structures dossier application
+with open('options/struct_folder.json') as json_struct_folder:
+    STRUCT_FOLD = json.load(json_struct_folder)
 
+# Si il n'y a aucun destinataire principal de declare
 while len(ARBO_DEST["destinataires"]) == 0:
     ARBO_DEST['destinataires'], ARBO_DEST['destinataires_cc'] = mail.create_dest()
 
