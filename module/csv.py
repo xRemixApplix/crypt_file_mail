@@ -10,6 +10,7 @@
 ###
 
 
+# CLASSE
 class Csv:
     """
         Classe Csv : classe servant a la gestion de tout ce qui a un rapport
@@ -27,7 +28,7 @@ class Csv:
         """
             Ecriture d'une liste dans un fichier .csv
         """
-        with open(self.file_name + ".csv", 'w') as file_csv:
+        with open(self.file_name, 'w') as file_csv:
             for code in list_info:
                 file_csv.write(str(code))
                 file_csv.write('\n')

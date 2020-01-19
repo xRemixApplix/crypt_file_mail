@@ -9,7 +9,7 @@
 # IMPORT MODULES
 import random
 
-from csv import Csv
+from module.csv import Csv
 
 
 # CLASSE

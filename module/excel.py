@@ -11,6 +11,15 @@ import datetime
 import xlrd
 
 
+# FONCTION
+def convert_date(info):
+    """
+        Conversion d'un float vers le format datetime :
+            - info : flottant qui sera transforme en datetime
+    """
+    return datetime.datetime(*xlrd.xldate_as_tuple(info, 0))
+
+
 # CLASSE
 class Excel:
     """
@@ -31,7 +40,7 @@ class Excel:
         """
             Lecture des données d'une feuille specifique dans un fichier excel
         """
-        workbook_classeur = xlrd.open_workbook(self.file_name + '.xlsx')
+        workbook_classeur = xlrd.open_workbook(self.file_name)
         liste_data = []
 
         sheet_page = workbook_classeur.sheet_by_name(self.sheet)
@@ -39,10 +48,3 @@ class Excel:
             liste_data.append(sheet_page.row_values(rownum))
 
         return liste_data[1:]
-
-    def convert_date(self, info):
-        """
-            Conversion d'un float vers le format datetime :
-                - info : flottant qui sera transforme en datetime
-        """
-        return datetime.datetime(*xlrd.xldate_as_tuple(info, 0))

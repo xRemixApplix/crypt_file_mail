@@ -19,10 +19,3 @@ with open('options/dest_mail.json') as json_dest_mail:
 # Recuperation structures dossier application
 with open('options/struct_folder.json') as json_struct_folder:
     STRUCT_FOLD = json.load(json_struct_folder)
-
-# Si il n'y a aucun destinataire principal de declare
-while len(ARBO_DEST["destinataires"]) == 0:
-    ARBO_DEST['destinataires'], ARBO_DEST['destinataires_cc'] = mail.create_dest()
-
-    with open('options/dest_mail.json', "w") as json_data:
-        json.dump(ARBO_DEST, json_data)
