@@ -33,6 +33,7 @@ mail.envoi(FILE_CONSO + '.csv', ARBO_DEST['destinataires'],
 if len(csv.lecture(STRUCT_FOLD['dest_csv_conso'] + 'ef_codes_StChristolDAlbion')) == 1:
     code.creation(STRUCT_FOLD['dest_csv_conso']
                   + 'ef_codes_StChristolDAlbion')
+    Csv.ecriture(self.file_name, list_codes)
     mail.envoi(STRUCT_FOLD['dest_csv_conso'] + 'ef_codes_StChristolDAlbion.csv',
                ARBO_DEST['destinataires'],
                ARBO_DEST['destinataires_cc'], "Fichier de codes", "Fichier de codes.")

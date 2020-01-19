@@ -1,8 +1,12 @@
 """
-    Fichier regroupant les fonctions gérant les mails
+    Fichier de la classe Mail
+    Auteur : Remi Invernizzi
+    Version : 1.0
+    Date : Janvier 2020
 """
 
-# IMPORT
+
+# IMPORT MODULES
 import re
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -11,100 +15,66 @@ from email.mime.base import MIMEBase
 from email import encoders
 
 
-# CONSTANTES
-EMAIL_REGEX = re.compile(
-    r"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*"
-    r'|^"([\001-\010\013\014\016-\037!#-\[\]-\177]|\\[\001-011\013\014\016-\177])*"'
-    r')@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?$', re.IGNORECASE)
-
-# FONCTIONS
-def envoi(fichier_a_envoyer, liste_destinataires, liste_destinataires_cc, sujet_mail, texte_mail):
+# CLASSE
+class Mail:
     """
-        Envoi d'un mail
+        Classe Mail : classe servant a la gestion de tout ce qui a un rapport
+        avec les mails (authentification, definition des destinataires, etc...)
     """
-    # Destinataires
-    from_add = "remi.invernizzi@gmail.com"
-    to_add = liste_destinataires
-    cc_add = liste_destinataires_cc
 
-    message = MIMEMultipart()
+    EMAIL_REGEX = re.compile(
+        r"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*"
+        r'|^"([\001-\010\013\014\016-\037!#-\[\]-\177]|\\[\001-011\013\014\016-\177])*"'
+        r')@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?$', re.IGNORECASE
+    )
 
-    # Entete
-    message['From'] = from_add
-    message['To'] = ','.join(to_add)
-    message['CC'] = ','.join(cc_add)
-    message['Subject'] = sujet_mail
-    # Corps
-    message.attach(MIMEText(texte_mail.encode('utf-8'), 'plain', 'utf-8'))
-    # Piece jointe
-    nom_piece_jointe = fichier_a_envoyer.split('/')[-1]
-    piece = open(fichier_a_envoyer, 'rb')
-    part = MIMEBase('application', 'octet-stream')
-    part.set_payload((piece).read())
-    encoders.encode_base64(part)
-    part.add_header('Content-Disposition', 'piece; filename= %s' % nom_piece_jointe)
-    message.attach(part)
-    # Connexion au serveur sortant de l'expéditeur
-    serveur = smtplib.SMTP('smtp.gmail.com', 587)
-    # Specification de la securisation
-    serveur.starttls()
-    # Authentification Expediteur
-    serveur.login(from_add, "22bp86g5mf937ztk")
-    texte = message.as_string().encode('utf-8')
-    to_adds = to_add + cc_add
+    def __init__(self, exp, dest_princ, dest_cop, smtp_serv, psswd, smtp_port):
+        """
+            Constructeur de la classe 'Mail' :
+                - exp           : adresse de l'expediteur (serveur).
+                - dest_princ    : destinataire(s) principal(ux) du mail.
+                - dest_cop      : destinataire(s) en copie du mail.
+                - smtp_serv     : adresse du serveur SMTP.
+                - psswd         : mot de passe d'acces au serveur SMTP.
+        """
+        self.message = MIMEMultipart()
+        self.message['From'] = exp
+        self.message['To'] = ','.join(dest_princ)
+        self.message['CC'] = ','.join(dest_cop)
 
-    serveur.sendmail(from_add, to_adds, texte)
-    serveur.quit()
-    print("############################################")
-    print("# Mail envoye au destinataire.s defini.e.s #")
-    print("############################################")
+        self.smtp_serv = smtp_serv
+        self.psswd = psswd
+        self.smtp_port = smtp_port
 
+    def envoi(self, fichier_a_envoyer, sujet_mail, texte_mail):
+        """
+            Envoi d'un mail :
+                - fichier_a_envoyer : adresse du fichier a envoyer en piece jointe.
+                - sujet_mail        : titre du mail a envoyer.
+                - texte_mail        : texte du mail a envoyer.
+        """
+        self.message['Subject'] = sujet_mail
+        # Corps
+        self.message.attach(MIMEText(texte_mail.encode('utf-8'), 'plain', 'utf-8'))
+        # Piece jointe
+        part = MIMEBase('application', 'octet-stream')
+        part.set_payload((open(fichier_a_envoyer, 'rb')).read())
+        encoders.encode_base64(part)
+        part.add_header(
+            'Content-Disposition',
+            'piece; filename= %s' % fichier_a_envoyer.split('/')[-1]
+        )
+        self.message.attach(part)
 
-def create_dest():
-    """
-        Declaration des destinataires principaux et en copie pour remplissage
-        du fichier JSON les listants
-    """
-    list_dest = []
-    list_dest_cc = []
-
-    # Definitions des destinataires
-    print("########################################")
-    print("# Creation des destinataires de mails. #")
-    print("########################################")
-
-    while True:
-        try:
-            adress, param = input("Adresse Destinaire : ").split(' ')
-        except ValueError:
-            # Texte en rouge
-            print('\x1b[6;31;40m'
-                  + "Erreur de syntaxe"
-                  + '\x1b[0m')
-        else:
-            if adress.upper() != "Q":
-                if re.match(EMAIL_REGEX, adress) is None:
-                    # Texte en orange
-                    print('\x1b[6;33;40m'
-                          + "Format de l'adresse incorrecte"
-                          + '\x1b[0m')
-                else:
-                    if param.upper() == "D":
-                        list_dest.append(adress.lower())
-                    elif param.upper() == "C":
-                        list_dest_cc.append(adress.lower())
-                    else:
-                        # Texte en orange
-                        print('\x1b[6;33;40m'
-                              + "Etat Destinataire non reconnu (D: Principal, C: Copie)"
-                              + '\x1b[0m')
-            else:
-                break
-
-    return list_dest, list_dest_cc
-
-
-# AUTO-LANCEMENT
-if __name__ == '__main__':
-    envoi("test_conso.csv", ["r.invernizzi@jp-indus.fr"], [""],
-          "Rapport EXPL de XXXXXX", "Report de consommation presentes sur le site de XXXXXX")
+        serveur = smtplib.SMTP(self.smtp_serv, self.smtp_port)
+        serveur.starttls()
+        serveur.login(self.message['From'], self.psswd)
+        print("###   Authentification Reussie   ###")
+        serveur.sendmail(
+            self.message['From'],
+            self.message['To'] + self.message['CC'],
+            self.message.as_string().encode('utf-8')
+        )
+        print("###         Mail envoye         ###")
+        serveur.quit()
+        print("### Deconnexion du serveur SMTP ###")

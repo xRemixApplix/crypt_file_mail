@@ -1,5 +1,5 @@
 """
-    Script de creation de l'executable du programme
+    Script de conversion du fichier auto.py permettant de le rendre executable.
 """
 from cx_Freeze import setup, Executable
 BASE = None

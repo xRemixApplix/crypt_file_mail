@@ -1,71 +1,76 @@
 """
-    Fichier regroupant les fonctions gérant le fichier .csv
-    contenant les informations de consommation.
+    Fichier de la classe Code_file
+    Auteur : Remi Invernizzi
+    Version : 1.0
+    Date : Janvier 2020
 """
 
 # IMPORT
 import datetime
 
-import module.csv as csv
-import module.excel as excel
+from csv import Csv
 
 
-# CONSTANTES
-ENTETE = "id_cp; bd; p; val; eq_kwh; eq_eu"
-
-
-# FONCTIONS
-def creation(file_name, struct_fold):
+# CLASSE
+class ConsoFile(Csv):
     """
-        Creation du fichier .csv contenant les informations des mesures
-        à envoyer par mail.
+        Classe ConsoFile : classe servant a la gestion de tout ce qui a un rapport
+        avec le fichier de csv de consommation
     """
-    list_conso = [ENTETE]
-    date = name = mesure = ""
 
-    for data in excel.lecture(file_name, 'DATA'):
-        if name != data[2]:
-            date = excel.convert_date(data[0])
-            mesure = data[1]
-            name = data[2]
-        else:
-            ligne = str(data[2]) + ";"
-            ligne += excel.convert_date(data[0]).strftime("%d/%m/%Y %H:%M") + ";"
-            ligne += format_ecart(excel.convert_date(data[0]), date) + ";"
-            ligne += str(round(data[1]-mesure, 3))
-            ligne += ";;"
+    ENTETE = "id_cp; bd; p; val; eq_kwh; eq_eu"
 
-            date = excel.convert_date(data[0])
-            mesure = data[1]
+    def __init__(self, file_name):
+        """
+            Constructeur de la classe 'CodeFile' :
+                - file_name     : nom du fichier de consommation.
+        """
+        Csv.__init__(self, file_name)
 
-            list_conso.append(ligne)
+    def creation(self, struct_fold, excel_file):
+        """
+            Creation du fichier .csv contenant les informations des mesures
+            à envoyer par mail.
+        """
+        list_conso = [self.ENTETE]
+        date = name = mesure = ""
 
-    liste_codes = csv.lecture(struct_fold['dest_csv_conso'] + 'ef_codes_StChristolDAlbion')
-    file_conso = struct_fold['dest_csv_conso'] + 'ef_consommations_StChristolDAlbion_' \
-        + str(datetime.date.today()) + "_" + liste_codes[0]
-    csv.ecriture(file_conso, list_conso)
-    csv.ecriture(struct_fold['dest_csv_conso'] + 'ef_codes_StChristolDAlbion', liste_codes[1:-1])
+        for data in excel_file.lecture(self.file_name, 'DATA'):
+            if name != data[2]:
+                date = excel_file.convert_date(data[0])
+                mesure = data[1]
+                name = data[2]
+            else:
+                ligne = str(data[2]) + ";"
+                ligne += excel_file.convert_date(data[0]).strftime("%d/%m/%Y %H:%M") + ";"
+                ligne += self.format_ecart(excel_file.convert_date(data[0]), date) + ";"
+                ligne += str(round(data[1]-mesure, 3))
+                ligne += ";;"
 
-    return file_conso
+                date = excel_file.convert_date(data[0])
+                mesure = data[1]
+
+                list_conso.append(ligne)
+
+        liste_codes = Csv.lecture(struct_fold['dest_csv_conso'] + 'ef_codes_StChristolDAlbion')
+        file_conso = struct_fold['dest_csv_conso'] + 'ef_consommations_StChristolDAlbion_' \
+            + str(datetime.date.today()) + "_" + liste_codes[0]
+        Csv.ecriture(self.file_name, list_conso)
+        Csv.ecriture(struct_fold['dest_csv_conso'] + 'ef_codes_StChristolDAlbion', liste_codes[1:-1])
+
+        return file_conso
 
 
-def format_ecart(date_d, date_d_1):
-    """
-        Formate l'ecart de temps entre les deux informations de consommation.
-    """
-    ecart = date_d-date_d_1
+    def format_ecart(self, date_d, date_d_1):
+        """
+            Formate l'ecart de temps entre les deux informations de consommation.
+        """
+        ecart = date_d-date_d_1
 
-    ecart = str(ecart).split(':')
+        ecart = str(ecart).split(':')
 
-    ecart = str(int(ecart[0])) + " heure(s)" if int(ecart[0]) > 0 else '' \
-        + str(int(ecart[1])) + " minute(s)" if int(ecart[1]) > 0 else '' \
-        + str(int(ecart[2])) + " seconde(s)" if int(ecart[2]) > 0 else ''
+        ecart = str(int(ecart[0])) + " heure(s)" if int(ecart[0]) > 0 else '' \
+            + str(int(ecart[1])) + " minute(s)" if int(ecart[1]) > 0 else '' \
+            + str(int(ecart[2])) + " seconde(s)" if int(ecart[2]) > 0 else ''
 
-    return ecart
-
-
-# AUTO-LANCEMENT
-if __name__ == '__main__':
-    import excel
-
-    creation('test.xlsx', "file_conso/")
+        return ecart

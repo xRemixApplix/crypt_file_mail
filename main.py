@@ -1,5 +1,5 @@
 """
-    Fichier général de l'application pour utilisateur
+    Script general permettant de lancer la version utilisateur de l'application.
 """
 
 # IMPORT
