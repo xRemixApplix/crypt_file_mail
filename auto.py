@@ -46,9 +46,17 @@ MAIL = Mail(
     ARBO_DEST['destinataires'],
     ARBO_DEST['destinataires_cc'],
     'smtp.gmail.com',
+    'pop.googlemail.com',
     CONFIG['pass_mail_exp'],
-    587
+    587,
+    995
 )
+
+# FONCTIONS  
+def ecriture_fichier_conso():
+    LISTE_CONSO_EXCEL = FICHIER_EXCEL.lecture()
+    LISTE_CONSO_CSV = FICHIER_CONSO.creation(LISTE_CONSO_EXCEL)
+    FICHIER_CONSO.ecriture(LISTE_CONSO_CSV)
 
 # Si il n'y a aucun destinataire principal de declare
 while len(ARBO_DEST["destinataires"]) == 0:
@@ -65,9 +73,9 @@ while True:
     courant = datetime.datetime.now()
 
     # Detection Reception Mail
-    Mailbox = poplib.POP3_SSL('pop.googlemail.com', '995')
-    Mailbox.user(CONFIG['mail_exp'])
-    Mailbox.pass_(CONFIG['pass_mail_exp'])
+    Mailbox = poplib.POP3_SSL(MAIL.pop_serv, MAIL.pop_port)
+    Mailbox.user(MAIL.message['From'])
+    Mailbox.pass_(MAIL.psswd)
 
     resp, items, octets = Mailbox.list()
 
@@ -81,15 +89,34 @@ while True:
 
             message = email.parser.Parser().parsestr(text)
 
-            print(message['Code'])
+            if message['Code'] == 'SI-01':
+                print("Erreur SI-01")
+                # Recuperation du dernier fichier envoye dans le dossier où il se trouve
+                # Envoi du fichier
+            elif message['Code'] == 'SI-02':
+                print("Erreur SI-02")
+                # Recuperation du dernier nom de fichier créé
+                # Verification de la structure du nom
+                # Renvoi du fichier par mail
+            elif message['Code'] == 'SI-03':
+                print("Erreur SI-03")
+                # Recuperation du dernier nom de fichier créé
+                # Recreation d'un fichier avec le meme nom 'corrige'
+                # Envoi du fichier par mail
+            elif message['Code'] == 'SI-04':
+                print("Erreur SI-04")
+                # Recuperation du dernier nom de fichier créé
+                # Recreation d'un fichier avec le meme nom 'corrige'
+                # Envoi du fichier par mail
+            else:
+                pass
+                # A voir quelles actions faire....
 
     Mailbox.quit()
 
-    if int(courant.hour) == 14 and not send:
+    if int(courant.hour) in CONFIG['heure_envoi_conso'] and not send:
         # Creation du fichier .csv consommation et envoi par mail
-        LISTE_CONSO_EXCEL = FICHIER_EXCEL.lecture()
-        LISTE_CONSO_CSV = FICHIER_CONSO.creation(LISTE_CONSO_EXCEL)
-        FICHIER_CONSO.ecriture(LISTE_CONSO_CSV)
+        ecriture_fichier_conso()
         MAIL.envoi(
             FICHIER_CONSO.file_name,
             "Rapport EXPL de St Christol d'Albion",
@@ -107,5 +134,5 @@ while True:
 
         send = True
 
-    if int(courant.hour) != 14:
+    if int(courant.hour) not in CONFIG['heure_envoi_conso']:
         send = False

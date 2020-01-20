@@ -28,7 +28,7 @@ class Mail:
         r')@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?$', re.IGNORECASE
     )
 
-    def __init__(self, exp, dest_princ, dest_cop, smtp_serv, psswd, smtp_port):
+    def __init__(self, exp, dest_princ, dest_cop, smtp_serv, pop_serv, psswd, smtp_port, pop_port):
         """
             Constructeur de la classe 'Mail' :
                 - exp           : adresse de l'expediteur (serveur).
@@ -43,8 +43,10 @@ class Mail:
         self.message['CC'] = ','.join(dest_cop)
 
         self.smtp_serv = smtp_serv
+        self.pop_serv = pop_serv
         self.psswd = psswd
         self.smtp_port = smtp_port
+        self.pop_port = pop_port
 
     def envoi(self, fichier_a_envoyer, sujet_mail, texte_mail):
         """
