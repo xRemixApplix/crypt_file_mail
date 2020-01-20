@@ -35,7 +35,7 @@ class Mail:
                 - dest_princ    : destinataire(s) principal(ux) du mail.
                 - dest_cop      : destinataire(s) en copie du mail.
                 - smtp_serv     : adresse du serveur SMTP.
-                - psswd         : mot de passe d'acces au serveur SMTP.
+                - psswd         : mot de passe d'acces au serveur mail.
         """
         self.message = MIMEMultipart()
         self.message['From'] = exp
@@ -75,9 +75,9 @@ class Mail:
             self.message['To'] + self.message['CC'],
             self.message.as_string().encode('utf-8')
         )
-        print("###         Mail envoye         ###")
+        print("###          Mail envoye         ###")
         serveur.quit()
-        print("### Deconnexion du serveur SMTP ###")
+        print("###  Deconnexion du serveur SMTP ###")
 
     def create_dest(self):
         """

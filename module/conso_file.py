@@ -7,6 +7,7 @@
 
 # IMPORT
 from module.csv import Csv
+from module.excel import convert_date
 
 
 # FONCTION
@@ -28,8 +29,8 @@ def format_ecart(date_d, date_d_1):
 # CLASSE
 class ConsoFile(Csv):
     """
-        Classe ConsoFile : classe servant a la gestion de tout ce qui a un rapport
-        avec le fichier de csv de consommation
+        Classe ConsoFile : classe servant a la gestion de tout ce qui
+        a un rapport avec le fichier de csv de consommation
     """
 
     ENTETE = "id_cp; bd; p; val; eq_kwh; eq_eu"
@@ -41,7 +42,7 @@ class ConsoFile(Csv):
         """
         Csv.__init__(self, file_name)
 
-    def creation(self, liste_conso_excel, excel_file):
+    def creation(self, liste_conso_excel):
         """
             Creation du fichier .csv contenant les informations des mesures
             à envoyer par mail.
@@ -50,18 +51,19 @@ class ConsoFile(Csv):
         date = name = mesure = ""
 
         for data in liste_conso_excel:
+            date_convertie = convert_date(data[0])
             if name != data[2]:
-                date = excel_file.convert_date(data[0])
+                date = date_convertie
                 mesure = data[1]
                 name = data[2]
             else:
                 ligne = str(data[2]) + ";"
-                ligne += excel_file.convert_date(data[0]).strftime("%d/%m/%Y %H:%M") + ";"
-                ligne += format_ecart(excel_file.convert_date(data[0]), date) + ";"
+                ligne += date_convertie.strftime("%d/%m/%Y %H:%M") + ";"
+                ligne += format_ecart(date_convertie, date) + ";"
                 ligne += str(round(data[1]-mesure, 3))
                 ligne += ";;"
 
-                date = excel_file.convert_date(data[0])
+                date = date_convertie
                 mesure = data[1]
 
                 list_conso.append(ligne)
