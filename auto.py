@@ -9,6 +9,7 @@ import signal
 import sys
 import poplib
 import email.parser
+import os
 
 from module.code_file import CodeFile
 from module.conso_file import ConsoFile
@@ -52,8 +53,12 @@ MAIL = Mail(
     995
 )
 
-# FONCTIONS  
+# FONCTIONS
 def ecriture_fichier_conso():
+    """
+        Fonction reunissant tout les appels necessaires à la creation du
+        fichier .csv de consommation.
+    """
     LISTE_CONSO_EXCEL = FICHIER_EXCEL.lecture()
     LISTE_CONSO_CSV = FICHIER_CONSO.creation(LISTE_CONSO_EXCEL)
     FICHIER_CONSO.ecriture(LISTE_CONSO_CSV)
@@ -91,8 +96,25 @@ while True:
 
             if message['Code'] == 'SI-01':
                 print("Erreur SI-01")
+                print("Recuperation dernier fichier consommation envoye")
                 # Recuperation du dernier fichier envoye dans le dossier où il se trouve
+                liste = os.listdir(STRUCT_FOLD['dest_csv_conso'])
+                last = 0
+                for i in range(len(liste)):
+                    fichier_a_tester = float(os.path.getctime(STRUCT_FOLD['dest_csv_conso'] + "/" +\
+                         liste[i]))
+                    dernier_fichier = float(os.path.getctime(STRUCT_FOLD['dest_csv_conso'] + "/" +\
+                         liste[last]))
+                    if fichier_a_tester >= dernier_fichier:
+                        last = i
+                print("Recuperation OK")
+                print("Renvoi du mail")
                 # Envoi du fichier
+                MAIL.envoi(
+                    STRUCT_FOLD['dest_csv_conso'] + "/" + liste[last],
+                    "Rapport EXPL de St Christol d'Albion",
+                    "Rapport de consommations presentes sur le site de St Christol d'Albion"
+                )
             elif message['Code'] == 'SI-02':
                 print("Erreur SI-02")
                 # Recuperation du dernier nom de fichier créé
