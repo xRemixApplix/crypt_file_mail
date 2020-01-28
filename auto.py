@@ -18,7 +18,7 @@ from module.excel import Excel
 
 
 # DETECTION FERMETURE PROGRAMME
-def fermer_programme(signal, frame):
+def fermer_programme(signal_close, frame_close):
     """
         Detection de la fermeture du programme
     """
@@ -63,6 +63,47 @@ def ecriture_fichier_conso():
     LISTE_CONSO_CSV = FICHIER_CONSO.creation(LISTE_CONSO_EXCEL)
     FICHIER_CONSO.ecriture(LISTE_CONSO_CSV)
 
+def recup_nom_dernier_fichier():
+    """
+        Recuperation du nom du dernier fichier de consommation
+        créé.
+    """
+    print("Recuperation dernier fichier consommation envoye")
+    # Recuperation du dernier fichier envoye dans le dossier où il se trouve
+    liste = os.listdir(STRUCT_FOLD['dest_csv_conso'])
+    id_last = 0
+    for i in range(len(liste)):
+        fichier_a_tester = float(os.path.getctime(STRUCT_FOLD['dest_csv_conso'] + "/" +\
+            liste[i]))
+        dernier_fichier = float(os.path.getctime(STRUCT_FOLD['dest_csv_conso'] + "/" +\
+            liste[id_last]))
+        if fichier_a_tester >= dernier_fichier:
+            id_last = i
+    print("Recuperation OK.")
+    return liste[id_last]
+
+def verif_nom_fichier(nom_fichier):
+    """
+        Vérification du nom du dernier fichier de consommation
+        créé.
+    """
+    verif_fichier = 'ef_consommations_StChristolDAlbion_' + str(datetime.date.today()) + "_" \
+        + FICHIER_CODE.lecture()[CONFIG['last_id']] + ".csv"
+    if nom_fichier != verif_fichier:
+        print("Nom du fichier incorrect.")
+        print(">>>>>>>>>>>>>>>", nom_fichier)
+        print("<<<<<<<<<<<<<<<", verif_fichier)
+        print("Renommage du fichier.")
+        os.rename(
+            STRUCT_FOLD['dest_csv_conso'] + "/" + nom_fichier,
+            STRUCT_FOLD['dest_csv_conso'] + "/" + verif_fichier
+        )
+    else:
+        print("Le nom du fichier semble correct.")
+        print("Merci d'effectuer une verification manuelle.")
+
+    return verif_fichier
+
 # Si il n'y a aucun destinataire principal de declare
 while len(ARBO_DEST["destinataires"]) == 0:
     ARBO_DEST['destinataires'], ARBO_DEST['destinataires_cc'] = MAIL.create_dest()
@@ -94,45 +135,49 @@ while True:
 
             message = email.parser.Parser().parsestr(text)
 
-            if message['Code'] == 'SI-01':
-                print("Erreur SI-01")
-                print("Recuperation dernier fichier consommation envoye")
-                # Recuperation du dernier fichier envoye dans le dossier où il se trouve
-                liste = os.listdir(STRUCT_FOLD['dest_csv_conso'])
-                last = 0
-                for i in range(len(liste)):
-                    fichier_a_tester = float(os.path.getctime(STRUCT_FOLD['dest_csv_conso'] + "/" +\
-                         liste[i]))
-                    dernier_fichier = float(os.path.getctime(STRUCT_FOLD['dest_csv_conso'] + "/" +\
-                         liste[last]))
-                    if fichier_a_tester >= dernier_fichier:
-                        last = i
-                print("Recuperation OK")
-                print("Renvoi du mail")
-                # Envoi du fichier
-                MAIL.envoi(
-                    STRUCT_FOLD['dest_csv_conso'] + "/" + liste[last],
-                    "Rapport EXPL de St Christol d'Albion",
-                    "Rapport de consommations presentes sur le site de St Christol d'Albion"
-                )
-            elif message['Code'] == 'SI-02':
-                print("Erreur SI-02")
-                # Recuperation du dernier nom de fichier créé
-                # Verification de la structure du nom
-                # Renvoi du fichier par mail
-            elif message['Code'] == 'SI-03':
-                print("Erreur SI-03")
-                # Recuperation du dernier nom de fichier créé
-                # Recreation d'un fichier avec le meme nom 'corrige'
-                # Envoi du fichier par mail
-            elif message['Code'] == 'SI-04':
-                print("Erreur SI-04")
-                # Recuperation du dernier nom de fichier créé
-                # Recreation d'un fichier avec le meme nom 'corrige'
-                # Envoi du fichier par mail
+            if message['From'].replace('<', '').replace('>', '') in ARBO_DEST['destinataires']:
+                print("Expediteur reconnu :", message['From'])
+                if message['Code'] == 'SI-01':
+                    print("Erreur SI-01")
+                    # Recuperation du dernier fichier envoye dans le dossier ou il se trouve
+                    nom_last = recup_nom_dernier_fichier()
+                    print("Renvoi du mail")
+                    # Envoi du fichier
+                    MAIL.envoi(
+                        STRUCT_FOLD['dest_csv_conso'] + "/" + nom_last,
+                        "Rapport EXPL de St Christol d'Albion",
+                        "Rapport de consommations presentes sur le site de St Christol d'Albion"
+                    )
+                elif message['Code'] == 'SI-02':
+                    print("Erreur SI-02")
+                    # Recuperation du dernier nom de fichier cree
+                    nom_last = recup_nom_dernier_fichier()
+                    # Verification de la structure du nom
+                    nom_verif = verif_nom_fichier(nom_last)
+                    if nom_verif != nom_last:
+                        # Renvoi du fichier par mail
+                        MAIL.envoi(
+                            STRUCT_FOLD['dest_csv_conso'] + "/" + nom_verif,
+                            "Rapport EXPL de St Christol d'Albion",
+                            "Rapport de consommations presentes sur le site de St Christol d'Albion"
+                        )
+                elif message['Code'] == 'SI-03':
+                    print("Erreur SI-03")
+                    # Recuperation du dernier nom de fichier cree
+                    nom_last = recup_nom_dernier_fichier()
+                    # Recreation d'un fichier avec le meme nom 'corrige'
+                    # Envoi du fichier par mail
+                elif message['Code'] == 'SI-04':
+                    print("Erreur SI-04")
+                    # Recuperation du dernier nom de fichier créé
+                    nom_last = recup_nom_dernier_fichier()
+                    # Recreation d'un fichier avec le meme nom 'corrige'
+                    # Envoi du fichier par mail
+                else:
+                    pass
+                    # A voir quelles actions faire....
             else:
-                pass
-                # A voir quelles actions faire....
+                print("Expediteur inconnu :", message['From'])
 
     Mailbox.quit()
 
