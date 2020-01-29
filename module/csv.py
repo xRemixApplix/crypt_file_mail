@@ -14,7 +14,7 @@
 class Csv:
     """
         Classe Csv : classe servant a la gestion de tout ce qui a un rapport
-        avec les differents fiichiers .csv.
+        avec les differents fichiers .csv.
     """
 
     def __init__(self, file_name):
@@ -37,5 +37,5 @@ class Csv:
         """
             Lecture d'un fichier .csv retournant une liste
         """
-        with open(self.file_name + ".csv", 'r') as file_csv:
+        with open(self.file_name, 'r') as file_csv:
             return file_csv.read().split('\n')

@@ -8,6 +8,8 @@
 
 # IMPORT MODULES
 import random
+import shutil
+import datetime
 
 from module.csv import Csv
 
@@ -44,3 +46,21 @@ class CodeFile(Csv):
                 list_codes.append(temp)
 
         return list_codes
+
+    def ecriture(self, list_info, STRUCT_FOLD):
+        """
+            Ecriture d'une liste dans un fichier .csv
+        """
+        Csv.ecriture(self, list_info)
+        # Copie du fichier pour archivage
+        shutil.copy(
+            self.file_name,
+            STRUCT_FOLD['dest_csv_code_archiv'] + 'ef_codes_StChristolDAlbion_' +\
+                 str(datetime.date.today()) + ".csv"
+        )
+
+    def mise_a_jour(self, list_info):
+        """
+           Mise a jour des informations contenu dans un fichier .csv
+        """
+        Csv.ecriture(self, list_info)

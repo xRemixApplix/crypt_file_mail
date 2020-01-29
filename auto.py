@@ -39,9 +39,8 @@ with open('options/struct_folder.json') as json_struct_folder:
 
 # Declarations Instances de classe + CONSTANTES
 FICHIER_EXCEL = Excel(STRUCT_FOLD['excel'] + 'test_' + str(datetime.date.today()) + '.xlsx', "DATA")
-FICHIER_CODE = CodeFile(STRUCT_FOLD['dest_csv_conso'] + 'ef_codes_StChristolDAlbion')
-FICHIER_CONSO = ConsoFile(STRUCT_FOLD['dest_csv_conso'] + 'ef_consommations_StChristolDAlbion_'
-                          + str(datetime.date.today()) + "_" + FICHIER_CODE.lecture()[0] + ".csv")
+FICHIER_CODE = CodeFile(STRUCT_FOLD['dest_csv_conso'] + 'ef_codes_StChristolDAlbion.csv')
+
 MAIL = Mail(
     CONFIG['mail_exp'],
     ARBO_DEST['destinataires'],
@@ -63,14 +62,14 @@ def ecriture_fichier_conso():
     LISTE_CONSO_CSV = FICHIER_CONSO.creation(LISTE_CONSO_EXCEL)
     FICHIER_CONSO.ecriture(LISTE_CONSO_CSV)
 
-def recup_nom_dernier_fichier():
+def recup_nom_dernier_fichier(folder):
     """
         Recuperation du nom du dernier fichier de consommation
         créé.
     """
     print("Recuperation dernier fichier consommation envoye")
     # Recuperation du dernier fichier envoye dans le dossier où il se trouve
-    liste = os.listdir(STRUCT_FOLD['dest_csv_conso'])
+    liste = os.listdir(folder)
     id_last = 0
     for i in range(len(liste)):
         fichier_a_tester = float(os.path.getctime(STRUCT_FOLD['dest_csv_conso'] + "/" +\
@@ -88,7 +87,7 @@ def verif_nom_fichier(nom_fichier):
         créé.
     """
     verif_fichier = 'ef_consommations_StChristolDAlbion_' + str(datetime.date.today()) + "_" \
-        + FICHIER_CODE.lecture()[CONFIG['last_id']] + ".csv"
+        + CONFIG['last_id'] + ".csv"
     if nom_fichier != verif_fichier:
         print("Nom du fichier incorrect.")
         print(">>>>>>>>>>>>>>>", nom_fichier)
@@ -110,6 +109,15 @@ while len(ARBO_DEST["destinataires"]) == 0:
 
     with open('options/dest_mail.json', "w") as json_data:
         json.dump(ARBO_DEST, json_data)
+
+ # Si le fichier de codes est vide
+if len(FICHIER_CODE.lecture()) == 1:
+    FICHIER_CODE.ecriture(FICHIER_CODE.creation(), STRUCT_FOLD)
+    MAIL.envoi(
+        FICHIER_CODE.file_name,
+        "Fichier de Codes",
+        "Fichier de Codes d'identification pour le site de St Christol d'Albion"
+    )
 
 print("Initialisation : OK")
 print("En Attente...")
@@ -140,7 +148,7 @@ while True:
                 if message['Code'] == 'SI-01':
                     print("Erreur SI-01")
                     # Recuperation du dernier fichier envoye dans le dossier ou il se trouve
-                    nom_last = recup_nom_dernier_fichier()
+                    nom_last = recup_nom_dernier_fichier(STRUCT_FOLD['dest_csv_conso'])
                     print("Renvoi du mail")
                     # Envoi du fichier
                     MAIL.envoi(
@@ -151,7 +159,7 @@ while True:
                 elif message['Code'] == 'SI-02':
                     print("Erreur SI-02")
                     # Recuperation du dernier nom de fichier cree
-                    nom_last = recup_nom_dernier_fichier()
+                    nom_last = recup_nom_dernier_fichier(STRUCT_FOLD['dest_csv_conso'])
                     # Verification de la structure du nom
                     nom_verif = verif_nom_fichier(nom_last)
                     if nom_verif != nom_last:
@@ -164,13 +172,13 @@ while True:
                 elif message['Code'] == 'SI-03':
                     print("Erreur SI-03")
                     # Recuperation du dernier nom de fichier cree
-                    nom_last = recup_nom_dernier_fichier()
+                    nom_last = recup_nom_dernier_fichier(STRUCT_FOLD['dest_csv_conso'])
                     # Recreation d'un fichier avec le meme nom 'corrige'
                     # Envoi du fichier par mail
                 elif message['Code'] == 'SI-04':
                     print("Erreur SI-04")
                     # Recuperation du dernier nom de fichier créé
-                    nom_last = recup_nom_dernier_fichier()
+                    nom_last = recup_nom_dernier_fichier(STRUCT_FOLD['dest_csv_conso'])
                     # Recreation d'un fichier avec le meme nom 'corrige'
                     # Envoi du fichier par mail
                 else:
@@ -183,16 +191,23 @@ while True:
 
     if int(courant.hour) in CONFIG['heure_envoi_conso'] and not send:
         # Creation du fichier .csv consommation et envoi par mail
+        FICHIER_CONSO = ConsoFile(STRUCT_FOLD['dest_csv_conso'] + 'ef_consommations_StChristolDAlbion_'
+                          + str(datetime.date.today()) + "_" + FICHIER_CODE.lecture()[0] + ".csv")
+        CONFIG['last_id'] = FICHIER_CODE.lecture()[0]
         ecriture_fichier_conso()
         MAIL.envoi(
             FICHIER_CONSO.file_name,
             "Rapport EXPL de St Christol d'Albion",
             "Rapport de consommations presentes sur le site de St Christol d'Albion"
         )
+        with open('options/config.json', 'w') as json_config:
+            json_config.write(json.dumps(CONFIG))
+            
+        FICHIER_CODE.mise_a_jour(FICHIER_CODE.lecture()[1:-1])
 
         # Si le fichier de codes est vide
         if len(FICHIER_CODE.lecture()) == 1:
-            FICHIER_CODE.ecriture(FICHIER_CODE.creation())
+            FICHIER_CODE.ecriture(FICHIER_CODE.creation(), STRUCT_FOLD)
             MAIL.envoi(
                 FICHIER_CODE.file_name,
                 "Fichier de Codes",
