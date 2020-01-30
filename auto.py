@@ -22,7 +22,7 @@ def fermer_programme(signal_close, frame_close):
     """
         Detection de la fermeture du programme
     """
-    print("FERMETURE")
+    print("##### FERMETURE DU PROGRAMME #####")
     sys.exit()
 signal.signal(signal.SIGINT, fermer_programme)
 
@@ -36,6 +36,9 @@ with open('options/dest_mail.json') as json_dest_mail:
 # Recuperation structures dossier application
 with open('options/struct_folder.json') as json_struct_folder:
     STRUCT_FOLD = json.load(json_struct_folder)
+# Recuperation transformation intutilé mesure
+with open('options/transfo_nom.json') as json_transfo_nom:
+    TRANSFO_NOM = json.load(json_transfo_nom)
 
 # Declarations Instances de classe + CONSTANTES
 FICHIER_EXCEL = Excel(STRUCT_FOLD['excel'] + 'test_' + str(datetime.date.today()) + '.xlsx', "DATA")
@@ -53,76 +56,68 @@ MAIL = Mail(
 )
 
 # FONCTIONS
-def ecriture_fichier_conso():
-    """
-        Fonction reunissant tout les appels necessaires à la creation du
-        fichier .csv de consommation.
-    """
-    LISTE_CONSO_EXCEL = FICHIER_EXCEL.lecture()
-    LISTE_CONSO_CSV = FICHIER_CONSO.creation(LISTE_CONSO_EXCEL)
-    FICHIER_CONSO.ecriture(LISTE_CONSO_CSV)
-
-def recup_nom_dernier_fichier(folder):
-    """
-        Recuperation du nom du dernier fichier de consommation
-        créé.
-    """
-    print("Recuperation dernier fichier consommation envoye")
-    # Recuperation du dernier fichier envoye dans le dossier où il se trouve
-    liste = os.listdir(folder)
-    id_last = 0
-    for i in range(len(liste)):
-        fichier_a_tester = float(os.path.getctime(STRUCT_FOLD['dest_csv_conso'] + "/" +\
-            liste[i]))
-        dernier_fichier = float(os.path.getctime(STRUCT_FOLD['dest_csv_conso'] + "/" +\
-            liste[id_last]))
-        if fichier_a_tester >= dernier_fichier:
-            id_last = i
-    print("Recuperation OK.")
-    return liste[id_last]
-
-def verif_nom_fichier(nom_fichier):
-    """
-        Vérification du nom du dernier fichier de consommation
-        créé.
-    """
-    verif_fichier = 'ef_consommations_StChristolDAlbion_' + str(datetime.date.today()) + "_" \
-        + CONFIG['last_id'] + ".csv"
-    if nom_fichier != verif_fichier:
-        print("Nom du fichier incorrect.")
-        print(">>>>>>>>>>>>>>>", nom_fichier)
-        print("<<<<<<<<<<<<<<<", verif_fichier)
-        print("Renommage du fichier.")
-        os.rename(
-            STRUCT_FOLD['dest_csv_conso'] + "/" + nom_fichier,
-            STRUCT_FOLD['dest_csv_conso'] + "/" + verif_fichier
-        )
-    else:
-        print("Le nom du fichier semble correct.")
-        print("Merci d'effectuer une verification manuelle.")
-
-    return verif_fichier
-
-# Si il n'y a aucun destinataire principal de declare
-while len(ARBO_DEST["destinataires"]) == 0:
-    ARBO_DEST['destinataires'], ARBO_DEST['destinataires_cc'] = MAIL.create_dest()
-
-    with open('options/dest_mail.json', "w") as json_data:
-        json.dump(ARBO_DEST, json_data)
-
- # Si le fichier de codes est vide
-if len(FICHIER_CODE.lecture()) == 1:
-    FICHIER_CODE.ecriture(FICHIER_CODE.creation(), STRUCT_FOLD)
-    MAIL.envoi(
-        FICHIER_CODE.file_name,
-        "Fichier de Codes",
-        "Fichier de Codes d'identification pour le site de St Christol d'Albion"
-    )
-
+print("##### LANCEMENT DU PROGRAMME #####")
 print("Initialisation : OK")
 print("En Attente...")
 send = False
 while True:
+    def ecriture_fichier_conso():
+        """
+            Fonction reunissant tout les appels necessaires à la creation du
+            fichier .csv de consommation.
+        """
+        LISTE_CONSO_EXCEL = FICHIER_EXCEL.lecture()
+        LISTE_CONSO_CSV = FICHIER_CONSO.creation(LISTE_CONSO_EXCEL, TRANSFO_NOM)
+        FICHIER_CONSO.ecriture(LISTE_CONSO_CSV)
+
+    def recup_nom_dernier_fichier(folder):
+        """
+            Recuperation du nom du dernier fichier de consommation
+            créé.
+        """
+        print("Recuperation dernier fichier consommation envoye")
+        # Recuperation du dernier fichier envoye dans le dossier où il se trouve
+        liste = os.listdir(folder)
+        id_last = 0
+        for i in range(len(liste)):
+            fichier_a_tester = float(os.path.getctime(STRUCT_FOLD['dest_csv_conso'] + "/" +\
+                liste[i]))
+            dernier_fichier = float(os.path.getctime(STRUCT_FOLD['dest_csv_conso'] + "/" +\
+                liste[id_last]))
+            if fichier_a_tester >= dernier_fichier:
+                id_last = i
+        print("Recuperation OK.")
+        return liste[id_last]
+
+    def verif_nom_fichier(nom_fichier):
+        """
+            Vérification du nom du dernier fichier de consommation
+            créé.
+        """
+        verif_fichier = 'ef_consommations_StChristolDAlbion_' + str(datetime.date.today()) + "_" \
+            + CONFIG['last_id'] + ".csv"
+        if nom_fichier != verif_fichier:
+            print("Nom du fichier incorrect.")
+            print(">>>>>>>>>>>>>>>", nom_fichier)
+            print("<<<<<<<<<<<<<<<", verif_fichier)
+            print("Renommage du fichier.")
+            os.rename(
+                STRUCT_FOLD['dest_csv_conso'] + "/" + nom_fichier,
+                STRUCT_FOLD['dest_csv_conso'] + "/" + verif_fichier
+            )
+        else:
+            print("Le nom du fichier semble correct.")
+            print("Merci d'effectuer une verification manuelle.")
+
+        return verif_fichier
+
+    # Si il n'y a aucun destinataire principal de declare
+    while len(ARBO_DEST["destinataires"]) == 0:
+        ARBO_DEST['destinataires'], ARBO_DEST['destinataires_cc'] = MAIL.create_dest()
+
+        with open('options/dest_mail.json', "w") as json_data:
+            json.dump(ARBO_DEST, json_data)
+
     # Datetime
     courant = datetime.datetime.now()
 
@@ -174,7 +169,15 @@ while True:
                     # Recuperation du dernier nom de fichier cree
                     nom_last = recup_nom_dernier_fichier(STRUCT_FOLD['dest_csv_conso'])
                     # Recreation d'un fichier avec le meme nom 'corrige'
+                    nom_verif = verif_nom_fichier(nom_last)
                     # Envoi du fichier par mail
+                    if nom_verif != nom_last:
+                        # Renvoi du fichier par mail
+                        MAIL.envoi(
+                            STRUCT_FOLD['dest_csv_conso'] + "/" + nom_verif,
+                            "Rapport EXPL de St Christol d'Albion",
+                            "Rapport de consommations presentes sur le site de St Christol d'Albion"
+                        )
                 elif message['Code'] == 'SI-04':
                     print("Erreur SI-04")
                     # Recuperation du dernier nom de fichier créé

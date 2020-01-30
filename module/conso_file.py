@@ -42,7 +42,7 @@ class ConsoFile(Csv):
         """
         Csv.__init__(self, file_name)
 
-    def creation(self, liste_conso_excel):
+    def creation(self, liste_conso_excel, transfo_nom):
         """
             Creation du fichier .csv contenant les informations des mesures
             à envoyer par mail.
@@ -57,7 +57,7 @@ class ConsoFile(Csv):
                 mesure = data[1]
                 name = data[2]
             else:
-                ligne = str(data[2]) + ";"
+                ligne = transfo_nom[str(data[2])] + ";"
                 ligne += date_convertie.strftime("%d/%m/%Y %H:%M") + ";"
                 ligne += format_ecart(date_convertie, date) + ";"
                 ligne += str(round(data[1]-mesure, 3))
