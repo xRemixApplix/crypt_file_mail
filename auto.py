@@ -4,6 +4,7 @@
 
 # IMPORT
 import datetime
+import time
 import json
 import signal
 import sys
@@ -37,23 +38,11 @@ with open('options/dest_mail.json') as json_dest_mail:
 with open('options/struct_folder.json') as json_struct_folder:
     STRUCT_FOLD = json.load(json_struct_folder)
 # Recuperation transformation intutilé mesure
-with open('options/transfo_nom.json') as json_transfo_nom:
+with open('options/transfo_nom.json', encoding="utf-8") as json_transfo_nom:
     TRANSFO_NOM = json.load(json_transfo_nom)
 
 # Declarations Instances de classe + CONSTANTES
-FICHIER_EXCEL = Excel(STRUCT_FOLD['excel'] + 'test_' + str(datetime.date.today()) + '.xlsx', "DATA")
 FICHIER_CODE = CodeFile(STRUCT_FOLD['dest_csv_conso'] + 'ef_codes_StChristolDAlbion.csv')
-
-MAIL = Mail(
-    CONFIG['mail_exp'],
-    ARBO_DEST['destinataires'],
-    ARBO_DEST['destinataires_cc'],
-    'smtp.gmail.com',
-    'pop.googlemail.com',
-    CONFIG['pass_mail_exp'],
-    587,
-    995
-)
 
 # FONCTIONS
 print("##### LANCEMENT DU PROGRAMME #####")
@@ -61,12 +50,26 @@ print("Initialisation : OK")
 print("En Attente...")
 send = False
 while True:
-    def ecriture_fichier_conso():
+    FICHIER_EXCEL_00 = Excel(STRUCT_FOLD['excel'] + '70001-Index Cpt ESID - Rapport Jour 00H-81-' + str(datetime.date.today().strftime("%y%m%d")) + '-0010.xlsx', "DATA")
+    FICHIER_EXCEL_12 = Excel(STRUCT_FOLD['excel'] + '70001-Index Cpt ESID - Rapport Jour 12H-71-' + str(datetime.date.today().strftime("%y%m%d")) + '-1210.xlsx', "DATA")
+
+    MAIL = Mail(
+        CONFIG['mail_exp'],
+        ARBO_DEST['destinataires'],
+        ARBO_DEST['destinataires_cc'],
+        'smtp.def.gouv.fr',
+        'pop.def.gouv.fr',
+        CONFIG['pass_mail_exp'],
+        587,
+        995
+    )
+
+    def ecriture_fichier_conso(heure):
         """
             Fonction reunissant tout les appels necessaires à la creation du
             fichier .csv de consommation.
         """
-        LISTE_CONSO_EXCEL = FICHIER_EXCEL.lecture()
+        LISTE_CONSO_EXCEL = FICHIER_EXCEL_00.lecture() if heure==1 else FICHIER_EXCEL_12.lecture()
         LISTE_CONSO_CSV = FICHIER_CONSO.creation(LISTE_CONSO_EXCEL, TRANSFO_NOM)
         FICHIER_CONSO.ecriture(LISTE_CONSO_CSV)
 
@@ -113,6 +116,7 @@ while True:
 
     # Si il n'y a aucun destinataire principal de declare
     while len(ARBO_DEST["destinataires"]) == 0:
+        print("Creation de destinataires.")
         ARBO_DEST['destinataires'], ARBO_DEST['destinataires_cc'] = MAIL.create_dest()
 
         with open('options/dest_mail.json', "w") as json_data:
@@ -122,6 +126,7 @@ while True:
     courant = datetime.datetime.now()
 
     # Detection Reception Mail
+    """
     Mailbox = poplib.POP3_SSL(MAIL.pop_serv, MAIL.pop_port)
     Mailbox.user(MAIL.message['From'])
     Mailbox.pass_(MAIL.psswd)
@@ -191,33 +196,40 @@ while True:
                 print("Expediteur inconnu :", message['From'])
 
     Mailbox.quit()
-
+    """
     if int(courant.hour) in CONFIG['heure_envoi_conso'] and not send:
         # Creation du fichier .csv consommation et envoi par mail
         FICHIER_CONSO = ConsoFile(STRUCT_FOLD['dest_csv_conso'] + 'ef_consommations_StChristolDAlbion_'
                           + str(datetime.date.today()) + "_" + FICHIER_CODE.lecture()[0] + ".csv")
+        print("Creation Fichier : {}".format(FICHIER_CONSO.file_name))
         CONFIG['last_id'] = FICHIER_CODE.lecture()[0]
-        ecriture_fichier_conso()
-        MAIL.envoi(
-            FICHIER_CONSO.file_name,
-            "Rapport EXPL de St Christol d'Albion",
-            "Rapport de consommations presentes sur le site de St Christol d'Albion"
-        )
+        ecriture_fichier_conso(int(courant.hour))
+        
         with open('options/config.json', 'w') as json_config:
             json_config.write(json.dumps(CONFIG))
             
         FICHIER_CODE.mise_a_jour(FICHIER_CODE.lecture()[1:-1])
 
+        MAIL.envoi(
+            FICHIER_CONSO.file_name,
+            "Rapport EXPL de St Christol d'Albion",
+            "Rapport de consommations presentes sur le site de St Christol d'Albion"
+        )
+
         # Si le fichier de codes est vide
         if len(FICHIER_CODE.lecture()) == 1:
             FICHIER_CODE.ecriture(FICHIER_CODE.creation(), STRUCT_FOLD)
+            
             MAIL.envoi(
                 FICHIER_CODE.file_name,
                 "Fichier de Codes",
                 "Fichier de Codes d'identification pour le site de St Christol d'Albion"
             )
+            
 
         send = True
 
     if int(courant.hour) not in CONFIG['heure_envoi_conso']:
         send = False
+
+    time.sleep(60)

@@ -55,6 +55,7 @@ class Mail:
                 - sujet_mail        : titre du mail a envoyer.
                 - texte_mail        : texte du mail a envoyer.
         """
+        
         self.message['Subject'] = sujet_mail
         # Corps
         self.message.attach(MIMEText(texte_mail.encode('utf-8'), 'plain', 'utf-8'))
