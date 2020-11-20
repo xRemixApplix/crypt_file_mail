@@ -1,8 +1,8 @@
 """
     Fichier de la classe Code_file
     Auteur : Remi Invernizzi
-    Version : 1.0
-    Date : Janvier 2020
+    Version : 1.1
+    Date : Novembre 2020
 """
 
 # IMPORT
@@ -19,9 +19,9 @@ def format_ecart(date_d, date_d_1):
 
     ecart = str(ecart).split(':')
 
-    ecart = str(int(ecart[0])) + " heure(s)" if int(ecart[0]) > 0 else '' \
-        + str(int(ecart[1])) + " minute(s)" if int(ecart[1]) > 0 else '' \
-        + str(int(ecart[2])) + " seconde(s)" if int(ecart[2]) > 0 else ''
+    ecart = str(int(ecart[0])) + " heure" if int(ecart[0]) > 0 else '' \
+        + str(int(ecart[1])) + " minutes" if int(ecart[1]) > 0 else '' \
+        + str(int(ecart[2])) + " secondes" if int(ecart[2]) > 0 else ''
 
     return ecart
 

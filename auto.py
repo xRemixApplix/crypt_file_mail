@@ -1,5 +1,8 @@
 """
     Fichier général de l'application en automatique
+    Auteur : Remi Invernizzi
+    Version : 1.3
+    Date : Novembre 2020
 """
 
 # IMPORT
