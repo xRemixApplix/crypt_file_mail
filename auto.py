@@ -11,13 +11,16 @@ import sys
 import poplib
 import email.parser
 import os
+import logging
 
 from module.code_file import CodeFile
 from module.conso_file import ConsoFile
 from module.mail import Mail
 from module.excel import Excel
 
-
+# Reglage du niveau de journalisation du fichier de log
+logging.basicConfig(filename='log_file.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+ 
 # DETECTION FERMETURE PROGRAMME
 def fermer_programme(signal_close, frame_close):
     """
@@ -49,6 +52,7 @@ print("##### LANCEMENT DU PROGRAMME #####")
 print("Initialisation : OK")
 print("En Attente...")
 send = False
+
 while True:
     FICHIER_EXCEL_00 = Excel(STRUCT_FOLD['excel'] + '70001-Index Cpt ESID - Rapport Jour 00H-81-' + str(datetime.date.today().strftime("%y%m%d")) + '-0010.xlsx', "DATA")
     FICHIER_EXCEL_12 = Excel(STRUCT_FOLD['excel'] + '70001-Index Cpt ESID - Rapport Jour 12H-71-' + str(datetime.date.today().strftime("%y%m%d")) + '-1210.xlsx', "DATA")
@@ -199,8 +203,7 @@ while True:
     """
     if int(courant.hour) in CONFIG['heure_envoi_conso'] and not send:
         # Creation du fichier .csv consommation et envoi par mail
-        FICHIER_CONSO = ConsoFile(STRUCT_FOLD['dest_csv_conso'] + 'ef_consommations_StChristolDAlbion_'
-                          + str(datetime.date.today()) + "_" + FICHIER_CODE.lecture()[0] + ".csv")
+        FICHIER_CONSO = ConsoFile(STRUCT_FOLD['dest_csv_conso'] + 'ef_consommations_StChristolDAlbion_' + str(datetime.date.today()) + "_" + FICHIER_CODE.lecture()[0] + ".csv")
         print("Creation Fichier : {}".format(FICHIER_CONSO.file_name))
         CONFIG['last_id'] = FICHIER_CODE.lecture()[0]
         ecriture_fichier_conso(int(courant.hour))
@@ -226,10 +229,9 @@ while True:
                 "Fichier de Codes d'identification pour le site de St Christol d'Albion"
             )
             
-
         send = True
 
-    if int(courant.hour) not in CONFIG['heure_envoi_conso']:
-        send = False
+    if int(courant.hour) not in CONFIG['heure_envoi_conso']: send = False
 
-    time.sleep(60)
+    # Temps de pause entre chaque cycle de scruptation
+    time.sleep(600)
