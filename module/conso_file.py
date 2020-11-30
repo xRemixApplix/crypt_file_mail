@@ -9,6 +9,8 @@
 from module.csv import Csv
 from module.excel import convert_date
 
+import json
+
 
 # FONCTION
 def format_ecart(date_d, date_d_1):
@@ -48,24 +50,32 @@ class ConsoFile(Csv):
             à envoyer par mail.
         """
         list_conso = [self.ENTETE]
-        date = name = mesure = ""
+        date = name = ""
+        
+        with open('options/save_cpt.json', 'r') as cpts:
+            save_cpt = json.load(cpts)
 
         for data in liste_conso_excel:
             date_convertie = convert_date(data[0])
             if name != data[2]:
                 date = date_convertie
-                mesure = data[1]
                 name = data[2]
+                if data[1]>0: save_cpt[str(data[2])] = data[1]
             else:
+                data_cpt = data[1] if data[1]>0 else save_cpt[str(data[2])]
+                
                 ligne = transfo_nom[str(data[2])] + ";"
                 ligne += date_convertie.strftime("%d/%m/%Y %H:%M") + ";"
                 ligne += format_ecart(date_convertie, date) + ";"
-                ligne += str(round(data[1]-mesure, 3))
+                ligne += str(round(data_cpt-save_cpt[str(data[2])], 3))
                 ligne += ";;"
 
                 date = date_convertie
-                mesure = data[1]
+                if data[1]>0: save_cpt[str(data[2])] = data[1]
 
                 list_conso.append(ligne)
+                
+        with open('options/save_cpt.json', 'w') as cpts:
+            json.dump(save_cpt, cpts, indent=4)
 
         return list_conso
