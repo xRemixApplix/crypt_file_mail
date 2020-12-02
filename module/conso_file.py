@@ -1,8 +1,8 @@
 """
     Fichier de la classe Code_file
     Auteur : Remi Invernizzi
-    Version : 1.1
-    Date : Novembre 2020
+    Version : 1.2
+    Date : d2CEMBRE 2020
 """
 
 # IMPORT
@@ -71,7 +71,7 @@ class ConsoFile(Csv):
                 ligne += ";;"
 
                 date = date_convertie
-                if data[1]>0: save_cpt[str(data[2])] = data[1]
+                save_cpt[str(data[2])] = data_cpt
 
                 list_conso.append(ligne)
                 
